@@ -73,14 +73,13 @@ const nextConfig = {
       },
     ]
   },
-  experimental: icr(),
+  experimental: atlas_cache_handler(),
 }
 
 module.exports = nextConfig
 
-
-function icr() {
-  if (process.env.ATLAS_CACHE_HANDLER !== undefined || process.env.ATLAS_CACHE_HANDLER_ENABLED !== undefined) {
+function atlas_cache_handler() {
+  if (process.env.ATLAS_CACHE_HANDLER_ENABLED !== undefined) {
     console.log('custom cache handler enabled')
     return {
       incrementalCacheHandlerPath: require.resolve('./.atlas/atlas-cache-handler.js'),
@@ -90,3 +89,4 @@ function icr() {
 
   return undefined
 }
+
