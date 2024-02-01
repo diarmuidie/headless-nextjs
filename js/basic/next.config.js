@@ -72,7 +72,7 @@ const nextConfig = {
       },
     ]
   },
-  experimental: icr(),
+  // experimental: icr(),
 }
 
 module.exports = nextConfig
