@@ -11,10 +11,10 @@
     "wpe-build": "next build"
   },
   "dependencies": {
-    "next": ">= 13"
+    "next": "13.0.2"
   },
   "engines": {
-    "node": ">= 12"
+    "node": "16.20.2"
   },
   "packageManager": "inpm@8.0.0",
   "devDependencies": {
