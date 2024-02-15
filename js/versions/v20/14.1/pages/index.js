@@ -1,5 +1,5 @@
-import Head from '../../14.1/node_modules/next/head'
-import Link from '../../14.1/node_modules/next/link'
+import Head from 'next/head'
+import Link from 'next/link'
 
 export default function Home() {
   return (
