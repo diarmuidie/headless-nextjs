@@ -1,0 +1,26 @@
+{
+  "name": "diarmuid-headless",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "vercel": "mkdir -p .vercel && echo \"{ \\\"projectId\\\": \\\"_\\\", \\\"orgId\\\": \\\"_\\\", \\\"settings\\\": {} }\" > .vercel/project.json && vercel build",
+    "start": "next start -p ${PORT:-8080}",
+    "lint": "next lint",
+    "wpe-build": "next build"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "packageManager": "inpm@8.0.0",
+  "devDependencies": {
+    "@types/node": "^20.4.0",
+    "@types/react": "^18.2.14",
+    "typescript": "^5.1.6",
+    "vercel": "^31.4.0"
+  },
+  "dependencies": {
+    "next": "13.3"
+  }
+}
