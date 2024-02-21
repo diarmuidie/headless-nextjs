@@ -2,6 +2,7 @@
  * @type {import('next').NextConfig}
  */
 
+const { withAtlasConfig } = require("@wpengine/atlas-next")
 
 const nextConfig = {
   // output: 'standalone',
@@ -72,22 +73,6 @@ const nextConfig = {
       },
     ]
   },
-  experimental: icr(),
 }
 
-module.exports = nextConfig
-
-function icr() {
-  if (process.env.ATLAS_CACHE_HANDLER_ENABLED !== undefined) {
-    return {
-      incrementalCacheHandlerPath: require.resolve('./.atlas/atlas-cache-handler.js'),
-      isrMemoryCacheSize: 0
-    }
-  }
-
-  console.log("USING REPO LOCAL CACHE HANDLER")
-  return {
-    incrementalCacheHandlerPath: require.resolve('./local-cache-handler.js'),
-    isrMemoryCacheSize: 0
-  }
-}
+module.exports = withAtlasConfig(nextConfig, {})

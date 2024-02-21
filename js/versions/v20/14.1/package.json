@@ -21,6 +21,7 @@
     "vercel": "^31.4.0"
   },
   "dependencies": {
+    "@wpengine/atlas-next": "http://cshanpublicbucket.atlasdev.site/wpengine-atlas-next-1.0.0-beta.0.tgz",
     "next": "14.1"
   }
 }
