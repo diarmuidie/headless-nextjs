@@ -1,0 +1,24 @@
+{
+  "name": "yarn",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@wpengine/atlas-next": "./wpengine-atlas-next-1.0.0-alpha.0.tgz",
+    "next": "14.1.0",
+    "node-fetch": "^2.6.6",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  }
+}
