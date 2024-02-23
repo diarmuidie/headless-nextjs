@@ -11,6 +11,7 @@
     "wpe-build": "next build"
   },
   "dependencies": {
+    "@wpengine/atlas-next": "file:atlas-next",
     "next": ">= 13"
   },
   "engines": {
