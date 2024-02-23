@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@wpengine/atlas-next": "file:atlas-next",
-    "next": ">= 13"
+    "next": "13.4"
   },
   "engines": {
     "node": ">= 12"
