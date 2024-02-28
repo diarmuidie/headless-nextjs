@@ -5,6 +5,9 @@
 const { withAtlasConfig } = require("@wpengine/atlas-next")
 
 const nextConfig = {
+  experimental: {
+    serverActions: true,
+  },
   transpilePackages: ['@aws-sdk/client-s3'],
   // output: 'standalone',
   async rewrites() {
