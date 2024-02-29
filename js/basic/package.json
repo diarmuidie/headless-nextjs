@@ -11,8 +11,8 @@
     "wpe-build": "next build"
   },
   "dependencies": {
-    "@wpengine/atlas-next": "^1.0.0-beta.4",
-    "next": "13.4.13"
+    "@wpengine/atlas-next": "^1.0.0-beta.5",
+    "next": "13.4.12"
   },
   "engines": {
     "node": "18"
