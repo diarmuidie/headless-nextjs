@@ -20,6 +20,8 @@ export default async function handler(req, res) {
         await res.revalidate(url)
 
         // TODO clear the Cloudflare cache for these pages
+        // Can we purge the cache by the tag or do we need
+        // to purge the cache for each page URL?
       }
     }
 
