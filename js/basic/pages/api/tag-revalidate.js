@@ -10,16 +10,16 @@ export default async function handler(req, res) {
   try {
     const manifestLocation = 'manifest.json';
 
-    let manifest = {}
-
     const data = fs.readFileSync(manifestLocation, 'utf8');
-
-    manifest = JSON.parse(data);
+    let manifest = JSON.parse(data);
 
     for (const [url, tags] of Object.entries(manifest)) {
+
+      // Find any pages that used this tag and revalidate them
       if (tags.includes(tag)) {
-        console.log(`Revalidate ${url}`);
         await res.revalidate(url)
+
+        // TODO clear the Cloudflare cache for these pages
       }
     }
 

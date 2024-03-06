@@ -55,13 +55,14 @@ export async function getServerSideProps(context) {
   const post = response?.data?.post;
 
   if (post) {
+    // Add the keys to the Cloudflare cache tag header
     const tags = response?.data?.extensions?.queryAnalyzer?.keys;
     context.res.setHeader("Cache-Tags", tags.replace(' ', ','));
 
     const url = context.resolvedUrl
     const manifestLocation = 'manifest.json';
 
-    // Update the manifest file in place
+    // Update the manifest file (in place) with the url and tags/keys
     fs.readFile(manifestLocation, 'utf8', function readFileCallback(err, data) {
       let obj = {};
 
