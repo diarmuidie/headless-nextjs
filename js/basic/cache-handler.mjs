@@ -19,7 +19,7 @@ CacheHandler.onCreation(async () => {
     client,
     // timeout for the Redis client operations like `get` and `set`
     // after this timeout, the operation will be considered failed and the `localHandler` will be used
-    timeoutMs: 100,
+    timeoutMs: 5000,
   });
  
   const localHandler = createLruHandler();
