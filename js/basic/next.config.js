@@ -4,6 +4,7 @@
 const { withAtlasConfig } = require("@wpengine/atlas-next")
 
 const nextConfig = {
+  cacheHandler: process.env.NODE_ENV === 'production' ? require.resolve('./cache-handler.mjs') : undefined,
   // output: 'standalone',
   async rewrites() {
     return {
@@ -74,4 +75,5 @@ const nextConfig = {
   }
 }
 
-module.exports = withAtlasConfig(nextConfig, {})
+// module.exports = withAtlasConfig(nextConfig, {})
+module.exports = nextConfig
