@@ -25,7 +25,6 @@ export async function getStaticProps(context) {
     props: {
       generated,
     },
-    revalidate: 29,
   }
 }
 
@@ -44,7 +43,7 @@ export default function PostPage({generated}) {
       <h1 className="title">
           (ISR) Server Side Generated page (dynamic ID: {id}) with a 5 second render duration (to simulate waiting on a slow API call)
       </h1>
-      <p>Revalidated every 29 seconds, last revalidate: {generated}</p>
+      <p>No time based revalidation, last revalidate: {generated}</p>
     </main>
   </div>
   )
