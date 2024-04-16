@@ -8,10 +8,11 @@
     "vercel": "mkdir -p .vercel && echo \"{ \\\"projectId\\\": \\\"_\\\", \\\"orgId\\\": \\\"_\\\", \\\"settings\\\": {} }\" > .vercel/project.json && vercel build",
     "start": "next start -p ${PORT:-8080}",
     "lint": "next lint",
-    "wpe-build": "next build"
+    "wpe-build": "next build",
+    "postinstall": "atlas-patch"
   },
   "dependencies": {
-    "@wpengine/atlas-next": "https://cshanpublicbucket.atlasdev.site/wpengine-atlas-next-1.0.0.tgz",
+    "@wpengine/atlas-next": "file:wpengine-atlas-next-1.0.0.tgz",
     "next": ">= 13"
   },
   "engines": {
