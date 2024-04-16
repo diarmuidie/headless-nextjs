@@ -12,7 +12,7 @@
     "postinstall": "atlas-patch"
   },
   "dependencies": {
-    "@wpengine/atlas-next": "file:wpengine-atlas-next-1.0.0.tgz",
+    "@wpengine/atlas-next": "file:wpengine-atlas-next-1.1.0.tgz",
     "next": ">= 13"
   },
   "engines": {
