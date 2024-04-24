@@ -5,7 +5,7 @@
 const cacheHandler = require('./cache-handler')
 
 const nextConfig = {
-  cacheHandler,
+  cacheHandler: require.resolve('./cache-handler'),
   // output: 'standalone',
   async rewrites() {
     return {
