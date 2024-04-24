@@ -1,9 +1,11 @@
 /**
  * @type {import('next').NextConfig}
  */
-const { withAtlasConfig } = require("@wpengine/atlas-next")
+// const { withAtlasConfig } = require("@wpengine/atlas-next")
+const cacheHandler = require('./cache-handler')
 
 const nextConfig = {
+  cacheHandler,
   // output: 'standalone',
   async rewrites() {
     return {
@@ -82,4 +84,7 @@ const nextConfig = {
   }
 }
 
-module.exports = withAtlasConfig(nextConfig, {})
+
+
+// module.exports = withAtlasConfig(nextConfig, {})
+module.exports = nextConfig
