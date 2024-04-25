@@ -258,6 +258,7 @@ var RemoteCacheHandler = class {
     if (questionMarkIndex !== -1) {
       path = path.substring(0, questionMarkIndex);
     }
+    path = path.replace(/\/+$/g, "");
     return `${this.keyPrefix}/${this.buildID}/path/${path}`;
   }
   generateRevalidatePathKey(path) {
@@ -266,7 +267,7 @@ var RemoteCacheHandler = class {
     if (questionMarkIndex !== -1) {
       path = path.substring(0, questionMarkIndex);
     }
-    path = path.replace(/^\/+/g, "");
+    path = path.replace(/\/+$/g, "");
     return `${this.keyPrefix}/${this.buildID}/revalidate/${path}`;
   }
   generateKey(key) {
