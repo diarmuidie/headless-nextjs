@@ -221,6 +221,7 @@ var RemoteCacheHandler = class {
         const tagKey = this.generateKeyPath(tag);
         let paths = [];
         try {
+          this.debugLog(`Getting paths for tag ${tagKey}`);
           paths = await this.kvStore?.get(tagKey);
         } catch (error) {
           if (error instanceof KVNotFoundError) {
