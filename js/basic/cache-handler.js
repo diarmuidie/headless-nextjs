@@ -226,7 +226,6 @@ var RemoteCacheHandler = class {
         } catch (error) {
           if (error instanceof KVNotFoundError) {
             console.error(this.getErrorMessage(error));
-            continue;
           } else {
             throw error;
           }
