@@ -231,6 +231,7 @@ var RemoteCacheHandler = class {
           }
         }
         paths.push(key);
+        this.debugLog(`Adding paths ${paths.toString()} to tag ${tagKey}`);
         await this.kvStore?.set(tagKey, paths);
       }
     } catch (error) {
@@ -244,6 +245,7 @@ var RemoteCacheHandler = class {
     const tagKey = this.generateKeyPath(tag);
     const paths = await this.kvStore?.get(tagKey) ?? [];
     for (const path of paths) {
+      this.debugLog(`Revalidating path: ${path}`);
       const key = this.generateRevalidatePathKey(path);
       const currentTime = (/* @__PURE__ */ new Date()).toJSON();
       await this.kvStore?.set(key, currentTime);
