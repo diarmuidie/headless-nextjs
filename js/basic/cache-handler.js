@@ -241,8 +241,8 @@ var RemoteCacheHandler = class {
   }
   async revalidateTag(...args) {
     const [tag] = args;
-    this.debugLog(`Revalidate Tag: ${tag}`);
     const tagKey = this.generateKeyPath(tag);
+    this.debugLog(`Revalidate Tag: ${tag} with key ${tagKey}`);
     const paths = await this.kvStore?.get(tagKey) ?? [];
     for (const path of paths) {
       this.debugLog(`Revalidating path: ${path}`);
