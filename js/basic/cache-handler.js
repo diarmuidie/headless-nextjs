@@ -162,7 +162,7 @@ var RemoteCacheHandler = class {
     this.debugLog(`GET <hint:${ctx.kindHint}> ${key} ${remoteKey}`);
     try {
       const data = await this.kvStore?.get(remoteKey);
-      const pathKey = this.generateKeyPath(key);
+      const pathKey = this.generateRevalidatePathKey(key);
       const revalidatedAt = await this.kvStore?.get(pathKey);
       if (data?.lastModified != null && revalidatedAt != null && revalidatedAt > data.lastModified) {
         return null;
@@ -225,6 +225,7 @@ var RemoteCacheHandler = class {
         } catch (error) {
           if (error instanceof KVNotFoundError) {
             console.error(this.getErrorMessage(error));
+            continue;
           } else {
             throw error;
           }
@@ -251,9 +252,18 @@ var RemoteCacheHandler = class {
   }
   generateKeyPath(path) {
     path = path.replace(/^\/+/g, "");
+    const questionMarkIndex = path.indexOf("?");
+    if (questionMarkIndex !== -1) {
+      path = path.substring(0, questionMarkIndex);
+    }
     return `${this.keyPrefix}/${this.buildID}/path/${path}`;
   }
   generateRevalidatePathKey(path) {
+    path = path.replace(/^\/+/g, "");
+    const questionMarkIndex = path.indexOf("?");
+    if (questionMarkIndex !== -1) {
+      path = path.substring(0, questionMarkIndex);
+    }
     path = path.replace(/^\/+/g, "");
     return `${this.keyPrefix}/${this.buildID}/revalidate/${path}`;
   }
