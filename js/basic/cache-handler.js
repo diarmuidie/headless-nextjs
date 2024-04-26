@@ -164,8 +164,13 @@ var RemoteCacheHandler = class {
       const data = await this.kvStore?.get(remoteKey);
       const pathKey = this.generateRevalidatePathKey(key);
       const revalidatedAt = await this.kvStore?.get(pathKey);
-      if (data?.lastModified != null && revalidatedAt != null && revalidatedAt > data.lastModified) {
-        return null;
+      if (data?.lastModified != null && revalidatedAt != null) {
+        const revalidatedAtTime = new Date(revalidatedAt);
+        const lastModifiedTime = new Date(data.lastModified);
+        if (revalidatedAtTime > lastModifiedTime) {
+          this.debugLog(`path has been revalidated: ${key}`);
+          return null;
+        }
       }
       return data;
     } catch (error) {
@@ -240,7 +245,6 @@ var RemoteCacheHandler = class {
     await this.filesystemCache.set(...args);
   }
   async revalidateTag(...args) {
-    console.log("revalidateTag", args)
     const [tag] = args;
     const tagKey = this.generateKeyPath(tag);
     this.debugLog(`Revalidate Tag: ${tag} with key ${tagKey}`);
