@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 
 export async function GET(request: NextRequest) {
-  const path = request.nextUrl.searchParams.get('path') || '';
   const type = request.nextUrl.searchParams.get('type') || '';
+  let path = request.nextUrl.searchParams.get('path') || '';
+
+  const questionMarkIndex = path.indexOf("?");
+  if (questionMarkIndex !== -1) {
+    path = path.substring(0, questionMarkIndex);
+  }
+  path = path.replace(/\/+$/g, "");
   if (path != '') {
+    console.log(`APP ROUTER: revalidate path ${path} for type ${type}`);
     if (type == 'page') {
       revalidatePath(path, 'page');
       console.log('revalidated path page', path);

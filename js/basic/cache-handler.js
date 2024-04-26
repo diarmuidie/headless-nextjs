@@ -245,6 +245,7 @@ var RemoteCacheHandler = class {
     await this.filesystemCache.set(...args);
   }
   async revalidateTag(...args) {
+    console.log(args)
     const [tag] = args;
     const tagKey = this.generateKeyPath(tag);
     this.debugLog(`Revalidate Tag: ${tag} with key ${tagKey}`);
