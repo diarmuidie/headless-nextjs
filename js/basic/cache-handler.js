@@ -134,6 +134,7 @@ var RemoteCacheHandler = class {
   kvStoreRolloutPercent;
   isBuild;
   buildID;
+  atlasTags;
   constructor(ctx) {
     this.filesystemCache = new import_file_system_cache.default(ctx);
     this.debug = String(process.env.ATLAS_CACHE_HANDLER_DEBUG).toLowerCase() === "true";
@@ -147,6 +148,7 @@ var RemoteCacheHandler = class {
         console.error(this.getErrorMessage(error));
       }
     }
+    this.atlasTags = Array.isArray(ctx._requestHeaders?.["x-atlas-cache-tags"]) ? ctx._requestHeaders["x-atlas-cache-tags"] : [ctx._requestHeaders?.["x-atlas-cache-tags"] ?? ""];
     const defaultPercent = 100;
     const percentEnv = process.env.ATLAS_CACHE_HANDLER_ROLLOUT_PERCENT ?? "";
     const percentEnvNum = parseInt(percentEnv, 10);
@@ -162,15 +164,9 @@ var RemoteCacheHandler = class {
     this.debugLog(`GET <hint:${ctx.kindHint}> ${key} ${remoteKey}`);
     try {
       const data = await this.kvStore?.get(remoteKey);
-      const pathKey = this.generateRevalidatePathKey(key);
-      const revalidatedAt = await this.kvStore?.get(pathKey);
-      if (data?.lastModified != null && revalidatedAt != null) {
-        const revalidatedAtTime = new Date(revalidatedAt);
-        const lastModifiedTime = new Date(data.lastModified);
-        if (revalidatedAtTime > lastModifiedTime) {
-          this.debugLog(`path has been revalidated: ${key}`);
-          return null;
-        }
+      if (await this.isRevalidated(key, data?.lastModified)) {
+        this.debugLog(`path has been revalidated: ${key}`);
+        return null;
       }
       return data;
     } catch (error) {
@@ -213,14 +209,37 @@ var RemoteCacheHandler = class {
     } catch (error) {
       console.error(this.getErrorMessage(error));
     }
+    let tags = [];
+    if (data?.kind === "PAGE") {
+      const nextCacheTags = data.headers?.["x-next-cache-tags"];
+      tags = typeof nextCacheTags === "string" ? nextCacheTags.split(",") : [];
+    } else if (data?.kind === "FETCH") {
+      tags = ctx.tags ?? [];
+    }
     try {
-      let tags = [];
-      if (data?.kind === "PAGE") {
-        const nextCacheTags = data.headers?.["x-next-cache-tags"];
-        tags = typeof nextCacheTags === "string" ? nextCacheTags.split(",") : [];
-      } else if (data?.kind === "FETCH") {
-        tags = ctx.tags ?? [];
-      }
+      await this.setTags(tags, key);
+      await this.setAtlasTags(key);
+    } catch (error) {
+      console.error(this.getErrorMessage(error));
+    }
+    await this.filesystemCache.set(...args);
+  }
+  async revalidateTag(...args) {
+    const [tag] = args;
+    const tagKey = this.generateKeyPath(tag);
+    this.debugLog(`Revalidate Tag: ${tag} with key ${tagKey}`);
+    const paths = await this.kvStore?.get(tagKey) ?? [];
+    for (const path of paths) {
+      this.debugLog(`Revalidating path: ${path}`);
+      const key = this.generateRevalidatePathKey(path);
+      const currentTime = (/* @__PURE__ */ new Date()).toJSON();
+      await this.kvStore?.set(key, currentTime);
+      await this.purgeCloudflare(path);
+    }
+    await this.filesystemCache.revalidateTag(...args);
+  }
+  async setTags(tags, key) {
+    try {
       this.debugLog(`Storing tags: ${tags?.join(", ") ?? ""} for path ${key}`);
       for (const tag of tags) {
         const tagKey = this.generateKeyPath(tag);
@@ -229,9 +248,7 @@ var RemoteCacheHandler = class {
           this.debugLog(`Getting paths for tag ${tagKey}`);
           paths = await this.kvStore?.get(tagKey);
         } catch (error) {
-          if (error instanceof KVNotFoundError) {
-            console.error(this.getErrorMessage(error));
-          } else {
+          if (!(error instanceof KVNotFoundError)) {
             throw error;
           }
         }
@@ -242,21 +259,59 @@ var RemoteCacheHandler = class {
     } catch (error) {
       console.error(this.getErrorMessage(error));
     }
-    await this.filesystemCache.set(...args);
   }
-  async revalidateTag(...args) {
-    console.log(args)
-    const [tag] = args;
-    const tagKey = this.generateKeyPath(tag);
-    this.debugLog(`Revalidate Tag: ${tag} with key ${tagKey}`);
-    const paths = await this.kvStore?.get(tagKey) ?? [];
-    for (const path of paths) {
-      this.debugLog(`Revalidating path: ${path}`);
-      const key = this.generateRevalidatePathKey(path);
-      const currentTime = (/* @__PURE__ */ new Date()).toJSON();
-      await this.kvStore?.set(key, currentTime);
+  async setAtlasTags(key) {
+    this.debugLog(
+      `Storing Atlas tags: ${this.atlasTags?.join(", ") ?? ""} for path ${key}`
+    );
+    const path = this.generateAtlasTagPath(key);
+    let paths = [];
+    try {
+      paths = await this.kvStore?.get(path);
+    } catch (error) {
+      if (!(error instanceof KVNotFoundError)) {
+        throw error;
+      }
     }
-    await this.filesystemCache.revalidateTag(...args);
+    try {
+      paths.push(...this.atlasTags);
+      await this.kvStore?.set(path, paths);
+    } catch (error) {
+      console.error(this.getErrorMessage(error));
+    }
+  }
+  async purgeCloudflare(path) {
+    console.log("purging cloudflare path: ", path);
+    const atlasTagPath = this.generateAtlasTagPath(path);
+    try {
+      const atlasPaths = await this.kvStore?.get(atlasTagPath);
+      for (const atlasPath of atlasPaths) {
+        await this.purgeCloudflare(atlasPath);
+      }
+    } catch (error) {
+      if (!(error instanceof KVNotFoundError)) {
+        throw error;
+      }
+    }
+  }
+  async isRevalidated(key, lastModified) {
+    if (lastModified == null) {
+      return false;
+    }
+    try {
+      const pathKey = this.generateRevalidatePathKey(key);
+      const revalidatedAt = await this.kvStore?.get(pathKey);
+      if (revalidatedAt == null) {
+        return false;
+      }
+      const revalidatedAtTime = new Date(revalidatedAt);
+      const lastModifiedTime = new Date(lastModified);
+      if (revalidatedAtTime > lastModifiedTime) {
+        return true;
+      }
+    } catch (error) {
+    }
+    return false;
   }
   generateKeyPath(path) {
     path = path.replace(/^\/+/g, "");
@@ -266,6 +321,15 @@ var RemoteCacheHandler = class {
     }
     path = path.replace(/\/+$/g, "");
     return `${this.keyPrefix}/${this.buildID}/path/${path}`;
+  }
+  generateAtlasTagPath(path) {
+    path = path.replace(/^\/+/g, "");
+    const questionMarkIndex = path.indexOf("?");
+    if (questionMarkIndex !== -1) {
+      path = path.substring(0, questionMarkIndex);
+    }
+    path = path.replace(/\/+$/g, "");
+    return `${this.keyPrefix}/${this.buildID}/atlas/${path}`;
   }
   generateRevalidatePathKey(path) {
     path = path.replace(/^\/+/g, "");

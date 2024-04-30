@@ -1,6 +1,6 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import Link from 'next/link'
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -11,12 +11,11 @@ export default function Home() {
       </Head>
 
       <main>
-        <h1 className="title">
-          Atlas Platform Edge
-        </h1>
+        <h1 className="title">Atlas Platform Edge</h1>
 
         <p className="description">
-          Next.js features demo (<a href="https://github.com/diarmuidie/headless-nextjs">source</a>)
+          Next.js features demo (
+          <a href="https://github.com/diarmuidie/headless-nextjs">source</a>)
         </p>
 
         <div className="grid">
@@ -35,43 +34,32 @@ export default function Home() {
             <p>Server side generated page.</p>
           </Link>
 
-          <Link
-            href="/sample-static"
-            className="card"
-          >
+          <Link href="/sample-static" className="card">
             <h3>Static &rarr;</h3>
             <p>Static page.</p>
           </Link>
 
-          <Link
-            href="/sample-server"
-            className="card"
-          >
+          <Link href="/sample-server" className="card">
             <h3>Server &rarr;</h3>
             <p>Server side rendered page.</p>
           </Link>
 
-          <Link
-            href="/sample-odisr"
-            className="card"
-          >
+          <Link href="/before" className="card">
+            <h3>Before &rarr;</h3>
+            <p>Redirect to page.</p>
+          </Link>
+
+          <Link href="/sample-odisr" className="card">
             <h3>OD-ISR &rarr;</h3>
-            <p>
-              On-demand incremental static regeneration page.
-            </p>
+            <p>On-demand incremental static regeneration page.</p>
           </Link>
 
           <div className="card">
             <h3>Image Component &rarr;</h3>
             <a href="/bridge.png">
-              <Image
-                src="/bridge.png"
-                width={220}
-                height={220}
-              />
+              <Image src="/bridge.png" width={220} height={220} />
             </a>
           </div>
-
         </div>
       </main>
 
@@ -81,7 +69,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <img src="/wpe.svg" alt="WP Engine Logo" className="logo" />
         </a>
       </footer>
@@ -161,9 +149,8 @@ export default function Home() {
         }
 
         .description a:hover {
-          color: #0070f3
+          color: #0070f3;
         }
-
 
         code {
           background: #fafafa;
@@ -241,5 +228,5 @@ export default function Home() {
         }
       `}</style>
     </div>
-  )
+  );
 }
