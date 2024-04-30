@@ -7,10 +7,11 @@ export async function generateStaticParams() {
 }
 
 export default async function Page({ params }: { params: { id: string } }) {
-  const res = await fetch(
-    `https://jsonplaceholder.typicode.com/posts/${params.id}`,
-    { next: { tags: ['collection'] } },
-  );
+  // const res = await fetch(
+  //   `https://jsonplaceholder.typicode.com/posts/${params.id}`,
+  //   { next: { tags: ['collection'] } },
+  // );
+  const res = await fetchAPI(params.id);
   const data = (await res.json()) as { title: string; body: string };
 
   return (
@@ -25,5 +26,13 @@ export default async function Page({ params }: { params: { id: string } }) {
         <RenderingInfo type="isr" />
       </div>
     </div>
+  );
+}
+
+async function fetchAPI(id:string): Promise<Response> {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  return await fetch(
+    `https://jsonplaceholder.typicode.com/posts/${id}`,
+    { next: { tags: ['collection'] } },
   );
 }
