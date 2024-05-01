@@ -177,10 +177,6 @@ var RemoteCacheHandler = class {
     this.debugLog(`GET <hint:${ctx.kindHint}> ${key} ${remoteKey}`);
     try {
       const data = await this.kvStore?.get(remoteKey);
-      if (await this.isRevalidated(key, data?.lastModified)) {
-        this.debugLog(`path has been revalidated: ${key}`);
-        return null;
-      }
       return data;
     } catch (error) {
       const is404 = error instanceof KVNotFoundError;
@@ -217,11 +213,6 @@ var RemoteCacheHandler = class {
     };
     const remoteKey = this.generateKey(key);
     this.debugLog(`SET <kind:${data.kind}> ${key} ${remoteKey}`);
-    try {
-      await this.kvStore?.set(remoteKey, cacheEntry);
-    } catch (error) {
-      console.error(this.getErrorMessage(error));
-    }
     let tags = [];
     if (data?.kind === "PAGE") {
       const nextCacheTags = data.headers?.["x-next-cache-tags"];
@@ -230,7 +221,7 @@ var RemoteCacheHandler = class {
       tags = ctx.tags ?? [];
     }
     try {
-      await this.setTags(tags, key);
+      await this.kvStore?.set(remoteKey, cacheEntry, tags);
     } catch (error) {
       console.error(this.getErrorMessage(error));
     }
@@ -238,75 +229,9 @@ var RemoteCacheHandler = class {
   }
   async revalidateTag(...args) {
     const [tag] = args;
-    const tagKey = this.generateKeyPath(tag);
-    this.debugLog(`Revalidate Tag: ${tag} with key ${tagKey}`);
-    const paths = await this.kvStore?.get(tagKey) ?? [];
-    for (const path of paths) {
-      this.debugLog(`Revalidating path: ${path}`);
-      const key = this.generateRevalidatePathKey(path);
-      const currentTime = (/* @__PURE__ */ new Date()).toJSON();
-      await this.kvStore?.set(key, currentTime);
-    }
+    this.debugLog(`Revalidate Tag: ${tag}}`);
+    await this.kvStore?.deleteTag(tag);
     await this.filesystemCache.revalidateTag(...args);
-  }
-  async setTags(tags, key) {
-    try {
-      this.debugLog(`Storing tags: ${tags?.join(", ") ?? ""} for path ${key}`);
-      for (const tag of tags) {
-        const tagKey = this.generateKeyPath(tag);
-        let paths = [];
-        try {
-          this.debugLog(`Getting paths for tag ${tagKey}`);
-          paths = await this.kvStore?.get(tagKey);
-        } catch (error) {
-          if (!(error instanceof KVNotFoundError)) {
-            throw error;
-          }
-        }
-        paths.push(key);
-        this.debugLog(`Adding paths ${paths.toString()} to tag ${tagKey}`);
-        await this.kvStore?.set(tagKey, paths);
-      }
-    } catch (error) {
-      console.error(this.getErrorMessage(error));
-    }
-  }
-  async isRevalidated(key, lastModified) {
-    if (lastModified == null) {
-      return false;
-    }
-    try {
-      const pathKey = this.generateRevalidatePathKey(key);
-      const revalidatedAt = await this.kvStore?.get(pathKey);
-      if (revalidatedAt == null) {
-        return false;
-      }
-      const revalidatedAtTime = new Date(revalidatedAt);
-      const lastModifiedTime = new Date(lastModified);
-      if (revalidatedAtTime > lastModifiedTime) {
-        return true;
-      }
-    } catch (error) {
-    }
-    return false;
-  }
-  generateKeyPath(path) {
-    path = path.replace(/^\/+/g, "");
-    const questionMarkIndex = path.indexOf("?");
-    if (questionMarkIndex !== -1) {
-      path = path.substring(0, questionMarkIndex);
-    }
-    path = path.replace(/\/+$/g, "");
-    return `${this.keyPrefix}/${this.buildID}/path/${path}`;
-  }
-  generateRevalidatePathKey(path) {
-    path = path.replace(/^\/+/g, "");
-    const questionMarkIndex = path.indexOf("?");
-    if (questionMarkIndex !== -1) {
-      path = path.substring(0, questionMarkIndex);
-    }
-    path = path.replace(/\/+$/g, "");
-    return `${this.keyPrefix}/${this.buildID}/revalidate/${path}`;
   }
   generateKey(key) {
     key = key.replace(/^\/+/g, "");
@@ -317,9 +242,9 @@ var RemoteCacheHandler = class {
       return error.message;
     return String(error);
   }
-  debugLog(msg) {
+  debugLog(msg, ...optionalParams) {
     if (this.debug) {
-      console.debug("DEBUG: Remote Cache Handler: " + msg);
+      console.debug("DEBUG: Remote Cache Handler: " + msg, ...optionalParams);
     }
   }
   /**
