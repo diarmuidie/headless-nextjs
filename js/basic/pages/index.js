@@ -15,6 +15,8 @@ export default function Home() {
           Atlas Platform Edge
         </h1>
 
+        <p>This is an error
+
         <p className="description">
           Next.js features demo (<a href="https://github.com/diarmuidie/headless-nextjs">source</a>)
         </p>
