@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "@wpengine/atlas-next": "^1.1.0",
-    "next": ">= 13"
+    "next": ">= 14.2.2"
   },
   "engines": {
-    "node": ">= 12"
+    "node": "20"
   },
   "packageManager": "inpm@8.0.0",
   "devDependencies": {
