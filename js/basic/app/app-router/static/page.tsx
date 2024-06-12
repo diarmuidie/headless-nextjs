@@ -5,16 +5,19 @@ import Link from 'next/link'
 async function getData() {
   const res = await fetch('https://api.openbrewerydb.org/v1/breweries/random?size=1', { next: { revalidate: 15, tags: ["brew"] } })
 
+  const resbody = await res.json()
+
   console.log(res)
   console.log("res.json()")
-  console.log(res.json())
+  console.log(resbody)
+  console.log("res.json() done")
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
     throw new Error('Failed to fetch data')
   }
 
-  return res.json()
+  return resbody
 }
 
 export default async function Home() {
