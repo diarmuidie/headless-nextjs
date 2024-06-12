@@ -9,7 +9,9 @@ async function getData() {
   console.log("res")
   console.log(res)
   console.log("res.body()")
-  console.log(res.body)
+  // console.log(res.body)
+  const responseBody = await res.text();
+  console.log(responseBody);
   console.log("res.json()")
   const resbody = await res.json()
   console.log(resbody)
