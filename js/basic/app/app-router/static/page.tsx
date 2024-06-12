@@ -5,10 +5,13 @@ import Link from 'next/link'
 async function getData() {
   const res = await fetch('https://api.openbrewerydb.org/v1/breweries/random?size=1', { next: { revalidate: 15, tags: ["brew"] } })
 
-  const resbody = await res.json()
-
+  
+  console.log("res")
   console.log(res)
+  console.log("res.body()")
+  console.log(res.body)
   console.log("res.json()")
+  const resbody = await res.json()
   console.log(resbody)
   console.log("res.json() done")
 
