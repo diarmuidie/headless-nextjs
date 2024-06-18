@@ -89,5 +89,5 @@ const nextConfig = {
 
 
 
-// module.exports = withAtlasConfig(nextConfig, {})
-module.exports = nextConfig
+module.exports = withAtlasConfig(nextConfig, {})
+// module.exports = nextConfig
