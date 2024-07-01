@@ -67,6 +67,15 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: '/api/revalidate',
+        headers: [
+          {
+            key: 'cache-control',
+            value: 'no-cache',
+          }
+        ]
+      },
+      {
         source: '/sample-odisr',
         headers: [
           {
