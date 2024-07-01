@@ -7,6 +7,7 @@ export default async function handler(req, res) {
 
   try {
     await res.revalidate(req.query.page)
+    console.log('Revalidated', req.query.page)
     return res.json({ revalidated: true })
   } catch (err) {
     console.log(err)
