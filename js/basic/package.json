@@ -19,7 +19,7 @@
     "tailwindcss": "^3.4.3"
   },
   "engines": {
-    "node": "~20"
+    "node": "*"
   },
   "packageManager": "inpm@8.0.0",
   "devDependencies": {
