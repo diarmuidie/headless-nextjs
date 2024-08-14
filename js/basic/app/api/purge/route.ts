@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { EdgeCache } from '@wpengine/atlas-next/api';
+import { purgeTags } from '@wpengine/edge-cache';
 
 export async function GET(request: NextRequest) {
   const path = request.nextUrl.searchParams.get('path') || '';
@@ -11,9 +11,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const edgeCache = new EdgeCache();
-
-  await edgeCache.purgeByPath(path);
+  await purgeTags([path]);
 
   return NextResponse.json({
     purged: true,
