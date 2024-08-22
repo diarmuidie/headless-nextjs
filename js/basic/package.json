@@ -23,12 +23,12 @@
     "yarn": "1.22.19"
   },
   "engines": {
-    "node": "22.4.1",
+    "node": "22.4.0",
     "yarn": "1.22.19"
   },
   "packageManager": "yarn@1.22.19",
   "devDependencies": {
-    "@types/node": "22.4.1",
+    "@types/node": "22.4.0",
     "@types/react": "^18.2.14",
     "typescript": "^5.1.6"
   },
