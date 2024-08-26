@@ -33,3 +33,5 @@ wpe.json
 
 .vercel
 .open-next
+
+.pnpm-store/**
