@@ -243,3 +243,15 @@ export default function Home() {
     </div>
   )
 }
+
+export async function getServerSideProps(context) {
+  const used = process.memoryUsage()
+  console.log(used)
+  console.log(process.env.NODE_OPTIONS)
+
+  return {
+    props: {
+      "used": used,
+    },
+  }
+}

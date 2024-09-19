@@ -21,13 +21,16 @@ export default function Home({preview}) {
 export async function getServerSideProps(context) {
   let preview = "(preview mode disabled)"
 
+  const used = process.memoryUsage()
+  console.log(used)
+  console.log(process.env.NODE_OPTIONS)
   if (context.preview) {
     preview = "(preview mode enabled)"
   }
 
   return {
     props: {
-      "preview": preview,
+      "used": used,
     },
   }
 }
