@@ -249,6 +249,16 @@ export async function getServerSideProps(context) {
   console.log(used)
   console.log(process.env.NODE_OPTIONS)
 
+  const test = (array) => {
+    array.push((new Array(1000)).fill('test'));
+  };
+  
+  const testArray = [];
+  
+  for(let i = 0; i <= 100000; i++) {
+    test(testArray);
+  }
+
   return {
     props: {
       "used": used,
