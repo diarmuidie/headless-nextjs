@@ -7,7 +7,7 @@ import { SingleProduct } from '../../../components/single-product';
 import { Ping } from '../../../../../ui/ping';
 import { Suspense } from 'react';
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }) {
   return (
     <div className="space-y-8 lg:space-y-14">
       <SingleProduct

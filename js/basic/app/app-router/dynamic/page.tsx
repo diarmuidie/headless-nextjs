@@ -18,7 +18,7 @@ export default async function Home() {
 
   const data = await getData()
   const headersList = headers()
-  const referer = headersList.get('referer')
+  const referer = (await headersList).get('referer')
 
   return (
     <main className={styles.main}>
