@@ -1,9 +1,12 @@
 const { withAtlasConfig } = require("@wpengine/atlas-next")
-
+// import type { NextConfig } from 'next'
 /**
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
+  experimental: {
+    dynamicIO: true,
+  },
   // output: 'standalone',
   async rewrites() {
     return {

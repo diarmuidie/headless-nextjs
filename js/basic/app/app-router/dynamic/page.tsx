@@ -1,3 +1,4 @@
+"use cache"
 import Image from 'next/image'
 import styles from '../page.module.css'
 import { headers } from 'next/headers'
@@ -17,8 +18,8 @@ async function getData() {
 export default async function Home() {
 
   const data = await getData()
-  const headersList = headers()
-  const referer = headersList.get('referer')
+  // const headersList = await headers()
+  // const referer = headersList.get('referer')
 
   return (
     <main className={styles.main}>
