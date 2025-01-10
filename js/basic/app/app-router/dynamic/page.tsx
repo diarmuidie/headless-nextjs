@@ -17,7 +17,7 @@ async function getData() {
 export default async function Home() {
 
   const data = await getData()
-  const headersList = headers()
+  const headersList = await headers()
   const referer = headersList.get('referer')
 
   return (
