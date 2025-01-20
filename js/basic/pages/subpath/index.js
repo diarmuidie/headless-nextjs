@@ -56,9 +56,9 @@ export default function Home() {
           </a>
 
           <div className="card">
-            <a href="/bridge.png">
+            <a href="/32mb.jpg">
               <Image
-                src="/bridge.png"
+                src="/32mb.jpg"
                 width={220}
                 height={220}
               />

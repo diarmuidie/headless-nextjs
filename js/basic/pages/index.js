@@ -63,9 +63,9 @@ export default function Home() {
 
           <div className="card">
             <h3>Image Component &rarr;</h3>
-            <a href="/bridge.png">
+            <a href="/32mb.jpg">
               <Image
-                src="/bridge.png"
+                src="/32mb.jpg"
                 width={220}
                 height={220}
               />
