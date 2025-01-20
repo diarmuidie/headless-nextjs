@@ -15,12 +15,14 @@ export default function Home({generated, draftMode}) {
         </h1>
         <p>Revalidated every 28 seconds, last revalidate: {generated} (DraftMode: {draftMode})</p>
         <p>Version 2</p>
+        <img src="/32mb.jpg" alt="32mb" />
 
         <Link href="/sample-static" className="card">
           <h3>ISR &rarr;</h3>
           <p>Static Incremental static regeneration page.</p>
         </Link>
         <p>Version 2</p>
+        <img src="/32mb.jpg" alt="32mb" />
 
         <Link href="/sample-isr/sample-static2" className="card">
           <p>Sample Static 2</p>
