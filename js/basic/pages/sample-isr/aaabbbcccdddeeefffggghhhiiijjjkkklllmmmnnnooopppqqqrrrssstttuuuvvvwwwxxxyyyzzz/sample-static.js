@@ -38,7 +38,8 @@ export default function Home({generated, draftMode}) {
 // revalidation is enabled and a new request comes in
 export async function getStaticProps(context) {
   let date = new Date();
-  const generated = date.toString()
+  //const generated = date.toString()
+  const generated = "x".repeat(1024 * 1024 * 22)
 
   let draftMode = "false"
 
