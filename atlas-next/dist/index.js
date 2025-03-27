@@ -56,7 +56,7 @@ var APINotFoundError = class extends Error {
 var API = class {
   // The atlas-next package version will be injected from package.json
   // at build time by esbuild-plugin-version-injector
-  version = "2.0.0-beta.0";
+  version = "2.0.2";
   constructor() {
     if (process.env.HEADLESS_METADATA !== "true") {
       throw new Error("API: The app is not running on the Headless Platform");

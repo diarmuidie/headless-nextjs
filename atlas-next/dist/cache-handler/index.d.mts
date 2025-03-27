@@ -53,6 +53,7 @@ declare class RemoteCacheHandler {
      * @returns
      */
     private isOnDemand;
+    private isSetIncrementalResponseCacheContext;
 }
 
 export { RemoteCacheHandler as default };

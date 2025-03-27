@@ -29,7 +29,7 @@ var APINotFoundError = class extends Error {
 var API = class {
   // The atlas-next package version will be injected from package.json
   // at build time by esbuild-plugin-version-injector
-  version = "2.0.0-beta.0";
+  version = "2.0.2";
   constructor() {
     if (process.env.HEADLESS_METADATA !== "true") {
       throw new Error("API: The app is not running on the Headless Platform");
@@ -128,7 +128,9 @@ var EdgeCache = class {
 import { promises as fs } from "fs";
 import { denormalizePagePath } from "next/dist/shared/lib/page-path/denormalize-page-path";
 import { normalizePagePath } from "next/dist/shared/lib/page-path/normalize-page-path";
-import { CachedRouteKind } from "next/dist/server/response-cache";
+import {
+  CachedRouteKind
+} from "next/dist/server/response-cache";
 var RemoteCacheHandler = class _RemoteCacheHandler {
   debug;
   filesystemCache;
@@ -221,7 +223,7 @@ var RemoteCacheHandler = class _RemoteCacheHandler {
     };
     const remoteKey = this.generateKey(key);
     this.debugLog(`SET <kind:${data.kind}> ${key} ${remoteKey}`);
-    const isODISR = data.kind === CachedRouteKind.PAGES && await this.isOnDemand(ctx);
+    const isODISR = data.kind === CachedRouteKind.PAGES && this.isSetIncrementalResponseCacheContext(ctx) && await this.isOnDemand(ctx);
     let nextRevalidateMethod = "";
     if (data.kind === CachedRouteKind.PAGES) {
       nextRevalidateMethod = isODISR ? "OnDemandISR" : "ISR";
@@ -320,13 +322,13 @@ var RemoteCacheHandler = class _RemoteCacheHandler {
    * @returns
    */
   async isOnDemand(ctx) {
-    if (ctx === void 0) {
+    if (ctx?.cacheControl === void 0) {
       return false;
     }
-    if (ctx.revalidate === void 0 || ctx.revalidate === false) {
+    if (ctx.cacheControl.revalidate === void 0 || ctx.cacheControl.revalidate === false) {
       return true;
     }
-    if (ctx.revalidate < _RemoteCacheHandler.minISRCacheRevalidateSeconds) {
+    if (ctx.cacheControl.revalidate < _RemoteCacheHandler.minISRCacheRevalidateSeconds) {
       return false;
     }
     if (this.previewModeId !== void 0) {
@@ -343,6 +345,9 @@ var RemoteCacheHandler = class _RemoteCacheHandler {
       }
     }
     return false;
+  }
+  isSetIncrementalResponseCacheContext(ctx) {
+    return ctx.cacheControl !== void 0;
   }
 };
 
