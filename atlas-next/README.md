@@ -5,8 +5,8 @@ Package that provides improved Next.js support on WP Engine Headless Platform.
 See [our Node.js documentation](https://developers.wpengine.com/docs/atlas/platform-guides/customizing-builds/#nodejs) for supported versions of Node.js on Headless Platform
 
 The Atlas Next package versions:
--  `>=2.0.0 <2.0.2` require a minimum Next.js version of v15.0.0 and a maximum lower than v15.2.1
--  `>=2.0.2` require a minimum Next.js version of v15.2.1
+-  `>=3.0.0` require a minimum Next.js version of v15.2.1
+-  `>=2.0.0 <3.0.0` require a minimum Next.js version of v15.0.0 and a maximum lower than v15.2.1
 - `<2.0.0` require a minimum Next.js version of v12.2.0 and a maximum lower than v15.0.0
 
 For On-Demand Revalidation support a minimum Next.js version of v13.5.1 is required
@@ -15,9 +15,13 @@ _Next.js versions `>= 13.4.13 < 13.5.1` are not supported due to a [bug in Next.
 
 ## Install
 To install the package, run:
-### for Next.js versions `>= 15.0.0`
+### for Next.js versions `>= 15.2.1`
 ```sh
 $ npm install --save @wpengine/atlas-next
+```
+### for Next.js versions `>= 15.0.0 < 15.2.1`
+```sh
+$ npm install --save @wpengine/atlas-next@2
 ```
 ### for Next.js versions `< 15.0.0`
 ```sh
