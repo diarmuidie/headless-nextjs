@@ -18,13 +18,23 @@ export default function Home({generated}) {
   )
 }
 
-export async function getStaticProps() {
-  let date = new Date();
-  const generated = date.toString()
+export async function getStaticProps(context) {
+  if (context.draftMode) {
+    // dynamic data
+    let date = new Date();
+    const generated = date.toString()
 
+    return {
+      props: {
+        generated,
+      },
+      revalidate: 1
+    }
+  }
   return {
     props: {
-      generated,
-    }
+      generated: 'Not in draft mode'
+    },
+    revalidate: 1,
   }
 }
