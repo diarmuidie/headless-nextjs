@@ -1,10 +1,13 @@
 # Atlas Next
-Package that provides improved Next.js support on WP Engine Atlas.
+Package that provides improved Next.js support on WP Engine Headless Platform.
 
 ## Prerequisites
-See [our Node.js documentation](https://developers.wpengine.com/docs/atlas/platform-guides/customizing-builds/#nodejs) for supported versions of Node.js on Atlas
+See [our Node.js documentation](https://developers.wpengine.com/docs/atlas/platform-guides/customizing-builds/#nodejs) for supported versions of Node.js on Headless Platform
 
-The Atlas Next package requires a minimum Next.js version of v12.2.0
+The Atlas Next package versions:
+-  `>=3.0.0` require a minimum Next.js version of v15.2.1
+-  `>=2.0.0 <3.0.0` require a minimum Next.js version of v15.0.0 and a maximum lower than v15.2.1
+- `<2.0.0` require a minimum Next.js version of v12.2.0 and a maximum lower than v15.0.0
 
 For On-Demand Revalidation support a minimum Next.js version of v13.5.1 is required
 
@@ -12,34 +15,43 @@ _Next.js versions `>= 13.4.13 < 13.5.1` are not supported due to a [bug in Next.
 
 ## Install
 To install the package, run:
+### for Next.js versions `>= 15.2.1`
 ```sh
 $ npm install --save @wpengine/atlas-next
 ```
+### for Next.js versions `>= 15.0.0 < 15.2.1`
+```sh
+$ npm install --save @wpengine/atlas-next@2
+```
+### for Next.js versions `< 15.0.0`
+```sh
+$ npm install --save @wpengine/atlas-next@1
+```
 
 ## Usage
-In the `next.config.(mjs|js)` file at the root of your Next.js project wrap the exported `nextConfig` with the `withAtlasConfig` method:
+In the `next.config.(mjs|js)` file at the root of your Next.js project wrap the exported `nextConfig` with the `withWPEConfig` method:
 ```javascript
-const { withAtlasConfig } = require("@wpengine/atlas-next")
+const { withWPEConfig } = require("@wpengine/atlas-next")
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Your existing Next.js config
 }
 
-module.exports = withAtlasConfig(nextConfig)
+module.exports = withWPEConfig(nextConfig)
 ```
 
 ## API
 
-### withAtlasConfig
+### withWPEConfig
 ```ts
-withAtlasConfig(nextConfig: NextConfig, atlasConfig?: AtlasConfig): NextConfig
+withWPEConfig(nextConfig: NextConfig, wpeConfig?: WPEConfig): NextConfig
 ```
 
 #### Options
 `nextConfig`: The existing `nextConfig` in the `next.config.js` file
 
-`atlasConfig`: The following options can be set
+`wpeConfig`: The following options can be set
 
 | Name | Type | Description | Default value |
 | --- | --- | --- | --- |
@@ -48,7 +60,7 @@ withAtlasConfig(nextConfig: NextConfig, atlasConfig?: AtlasConfig): NextConfig
 For example:
 
 ```javascript
-module.exports = withAtlasConfig(nextConfig, { remoteCacheHandler: false })
+module.exports = withWPEConfig(nextConfig, { remoteCacheHandler: false })
 ```
 
 

@@ -28,11 +28,12 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/index.ts
-var src_exports = {};
-__export(src_exports, {
-  withAtlasConfig: () => withAtlasConfig
+var index_exports = {};
+__export(index_exports, {
+  withAtlasConfig: () => withAtlasConfig,
+  withWPEConfig: () => withWPEConfig
 });
-module.exports = __toCommonJS(src_exports);
+module.exports = __toCommonJS(index_exports);
 
 // src/config.ts
 var import_path = __toESM(require("path"));
@@ -55,10 +56,10 @@ var APINotFoundError = class extends Error {
 var API = class {
   // The atlas-next package version will be injected from package.json
   // at build time by esbuild-plugin-version-injector
-  version = "1.4.1";
+  version = "3.0.1";
   constructor() {
     if (process.env.HEADLESS_METADATA !== "true") {
-      throw new Error("API: The app is not running on the Atlas Platform");
+      throw new Error("API: The app is not running on the Headless Platform");
     }
   }
   /**
@@ -83,13 +84,13 @@ var KV = class extends API {
   static isAvailable() {
     const urlExists = (process.env.HEADLESS_KV_STORE_URL ?? "") !== "";
     const tokenExists = (process.env.HEADLESS_KV_STORE_TOKEN ?? "") !== "";
-    const atlasRuntime = String(process.env.HEADLESS_METADATA).toLowerCase() === "true";
-    return urlExists && tokenExists && atlasRuntime;
+    const runtime = String(process.env.HEADLESS_METADATA).toLowerCase() === "true";
+    return urlExists && tokenExists && runtime;
   }
   constructor() {
     super();
     if (process.env.HEADLESS_METADATA !== "true") {
-      throw new Error("KV: The app is not running on the Atlas Platform");
+      throw new Error("KV: The app is not running on the Headless Platform");
     }
     this.url = process.env.HEADLESS_KV_STORE_URL ?? "";
     if (this.url === "") {
@@ -110,18 +111,22 @@ var KV = class extends API {
     this.throwResponseErrors(response, key);
     return await response.json();
   }
-  async set(key, data) {
+  async set(key, data, nextRevalidationMethod = "") {
     if (data === null) {
       return;
+    }
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${this.token}`,
+      "User-Agent": `AtlasNext/${this.version}`
+    };
+    if (nextRevalidationMethod !== "") {
+      headers["Next-Revalidation-Method"] = nextRevalidationMethod;
     }
     const response = await (0, import_node_fetch.default)(`${this.url}/${key}`, {
       method: "PUT",
       body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.token}`,
-        "User-Agent": `AtlasNext/${this.version}`
-      }
+      headers
     });
     this.throwResponseErrors(response, key);
   }
@@ -129,7 +134,10 @@ var KV = class extends API {
 
 // src/config.ts
 function withAtlasConfig(nextConfig, atlasConfig) {
-  if (atlasConfig?.remoteCacheHandler === false) {
+  return withWPEConfig(nextConfig, atlasConfig);
+}
+function withWPEConfig(nextConfig, wpeConfig) {
+  if (wpeConfig?.remoteCacheHandler === false) {
     return nextConfig;
   }
   const nextModulePath = import_path.default.parse(require.resolve("next"));
@@ -138,58 +146,34 @@ function withAtlasConfig(nextConfig, atlasConfig) {
     nextConfig,
     nextPackage.version,
     // TODO: look closer how this can be stubbed to enable testing
-    // of the withAtlasConfig function
+    // of the withWPEConfig function
     require.resolve("@wpengine/atlas-next/cache-handler")
   );
 }
 function setCacheHandler(nextConfig, nextVersion, cacheHandlerPath) {
-  if (compare(nextVersion, "12.2.0") === -1) {
+  if (compare(nextVersion, "15.0.0") === -1) {
     throw new Error(
       "Next.js version " + nextVersion + " is not supported by @wpengine/atlas-next"
     );
   }
-  if (compare(nextVersion, "13.4.12") === 1 && compare(nextVersion, "13.5.1") === -1) {
-    throw new Error(
-      "Next.js version " + nextVersion + " is not supported by @wpengine/atlas-next, please use version >= 13.5.1."
-    );
+  if (nextConfig.cacheHandler !== void 0) {
+    console.warn("Overwriting existing cacheHandler config");
   }
-  if (compare(nextVersion, "14.1.0") === -1) {
-    nextConfig.experimental = nextConfig.experimental ?? {};
-    if (nextConfig.experimental.incrementalCacheHandlerPath !== void 0) {
-      console.warn("Overwriting existing incrementalCacheHandlerPath config");
-    }
-    nextConfig.experimental.incrementalCacheHandlerPath = cacheHandlerPath;
-    if (nextConfig.experimental.isrMemoryCacheSize !== void 0) {
-      console.warn("Overwriting existing isrMemoryCacheSize config");
-    }
-    nextConfig.experimental.isrMemoryCacheSize = 0;
-  } else {
-    if (nextConfig.cacheHandler !== void 0) {
-      console.warn("Overwriting existing cacheHandler config");
-    }
-    nextConfig.cacheHandler = cacheHandlerPath;
-    if (nextConfig.cacheMaxMemorySize !== void 0) {
-      console.warn("Overwriting existing cacheMaxMemorySize config");
-    }
-    nextConfig.cacheMaxMemorySize = 0;
+  nextConfig.cacheHandler = cacheHandlerPath;
+  if (nextConfig.cacheMaxMemorySize !== void 0) {
+    console.warn("Overwriting existing cacheMaxMemorySize config");
   }
-  let odisrSupported = true;
-  if (compare(nextVersion, "13.5.1") === -1) {
-    odisrSupported = false;
-  }
-  printStartupNotice(odisrSupported);
+  nextConfig.cacheMaxMemorySize = 0;
+  printStartupNotice();
   return nextConfig;
 }
-function printStartupNotice(odisrSupported) {
+function printStartupNotice() {
   if (process.env.HEADLESS_CACHE_HANDLER_STARTUP === void 0) {
-    let message = "Atlas remote cache handler enabled";
+    let message = "Headless Platform remote cache handler enabled";
     if (process.env.HEADLESS_METADATA_BUILD === void 0 && !KV.isAvailable()) {
       message = message + " (local storage mode)";
     }
     message = message + "\n";
-    if (!odisrSupported) {
-      message = message + "warn - For On-Demand Revalidation support upgrade to Next.js 13.5.1 or higher\n";
-    }
     console.log(message);
     process.env.HEADLESS_CACHE_HANDLER_STARTUP = "true";
   }
@@ -234,6 +218,7 @@ function validateVersion(version) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  withAtlasConfig
+  withAtlasConfig,
+  withWPEConfig
 });
 //# sourceMappingURL=index.js.map

@@ -7,7 +7,7 @@ type CacheHandlerParametersGet = Parameters<CacheHandler['get']>;
 type CacheHandlerParametersRevalidateTag = Parameters<CacheHandler['revalidateTag']>;
 /**
  * Implements the Next.js custom cache handler interface to provide a remote cache
- * on the Atlas WP Engine platform. The cache handler will fall back to reading from
+ * on the WP Engine Headless Platform. The cache handler will fall back to reading from
  * the local disk in cases where the remote cache is unavailable
  *
  * https://nextjs.org/docs/app/building-your-application/deploying#configuring-caching
@@ -53,6 +53,7 @@ declare class RemoteCacheHandler {
      * @returns
      */
     private isOnDemand;
+    private isSetIncrementalResponseCacheContext;
 }
 
 export { RemoteCacheHandler as default };

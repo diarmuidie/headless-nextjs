@@ -35,10 +35,10 @@ var APINotFoundError = class extends Error {
 var API = class {
   // The atlas-next package version will be injected from package.json
   // at build time by esbuild-plugin-version-injector
-  version = "1.4.1";
+  version = "3.0.1";
   constructor() {
     if (process.env.HEADLESS_METADATA !== "true") {
-      throw new Error("API: The app is not running on the Atlas Platform");
+      throw new Error("API: The app is not running on the Headless Platform");
     }
   }
   /**
@@ -63,13 +63,13 @@ var KV = class extends API {
   static isAvailable() {
     const urlExists = (process.env.HEADLESS_KV_STORE_URL ?? "") !== "";
     const tokenExists = (process.env.HEADLESS_KV_STORE_TOKEN ?? "") !== "";
-    const atlasRuntime = String(process.env.HEADLESS_METADATA).toLowerCase() === "true";
-    return urlExists && tokenExists && atlasRuntime;
+    const runtime = String(process.env.HEADLESS_METADATA).toLowerCase() === "true";
+    return urlExists && tokenExists && runtime;
   }
   constructor() {
     super();
     if (process.env.HEADLESS_METADATA !== "true") {
-      throw new Error("KV: The app is not running on the Atlas Platform");
+      throw new Error("KV: The app is not running on the Headless Platform");
     }
     this.url = process.env.HEADLESS_KV_STORE_URL ?? "";
     if (this.url === "") {
@@ -90,18 +90,22 @@ var KV = class extends API {
     this.throwResponseErrors(response, key);
     return await response.json();
   }
-  async set(key, data) {
+  async set(key, data, nextRevalidationMethod = "") {
     if (data === null) {
       return;
+    }
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${this.token}`,
+      "User-Agent": `AtlasNext/${this.version}`
+    };
+    if (nextRevalidationMethod !== "") {
+      headers["Next-Revalidation-Method"] = nextRevalidationMethod;
     }
     const response = await fetch(`${this.url}/${key}`, {
       method: "PUT",
       body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.token}`,
-        "User-Agent": `AtlasNext/${this.version}`
-      }
+      headers
     });
     this.throwResponseErrors(response, key);
   }

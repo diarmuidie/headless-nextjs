@@ -30,7 +30,7 @@ declare class KV extends API {
     static isAvailable(): boolean;
     constructor();
     get(key: string): Promise<any>;
-    set(key: string, data: any): Promise<void>;
+    set(key: string, data: any, nextRevalidationMethod?: string): Promise<void>;
 }
 
 export { EdgeCache, KV };

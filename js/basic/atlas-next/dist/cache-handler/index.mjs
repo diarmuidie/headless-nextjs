@@ -29,10 +29,10 @@ var APINotFoundError = class extends Error {
 var API = class {
   // The atlas-next package version will be injected from package.json
   // at build time by esbuild-plugin-version-injector
-  version = "1.4.1";
+  version = "3.0.1";
   constructor() {
     if (process.env.HEADLESS_METADATA !== "true") {
-      throw new Error("API: The app is not running on the Atlas Platform");
+      throw new Error("API: The app is not running on the Headless Platform");
     }
   }
   /**
@@ -57,13 +57,13 @@ var KV = class extends API {
   static isAvailable() {
     const urlExists = (process.env.HEADLESS_KV_STORE_URL ?? "") !== "";
     const tokenExists = (process.env.HEADLESS_KV_STORE_TOKEN ?? "") !== "";
-    const atlasRuntime = String(process.env.HEADLESS_METADATA).toLowerCase() === "true";
-    return urlExists && tokenExists && atlasRuntime;
+    const runtime = String(process.env.HEADLESS_METADATA).toLowerCase() === "true";
+    return urlExists && tokenExists && runtime;
   }
   constructor() {
     super();
     if (process.env.HEADLESS_METADATA !== "true") {
-      throw new Error("KV: The app is not running on the Atlas Platform");
+      throw new Error("KV: The app is not running on the Headless Platform");
     }
     this.url = process.env.HEADLESS_KV_STORE_URL ?? "";
     if (this.url === "") {
@@ -84,18 +84,22 @@ var KV = class extends API {
     this.throwResponseErrors(response, key);
     return await response.json();
   }
-  async set(key, data) {
+  async set(key, data, nextRevalidationMethod = "") {
     if (data === null) {
       return;
+    }
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${this.token}`,
+      "User-Agent": `AtlasNext/${this.version}`
+    };
+    if (nextRevalidationMethod !== "") {
+      headers["Next-Revalidation-Method"] = nextRevalidationMethod;
     }
     const response = await fetch(`${this.url}/${key}`, {
       method: "PUT",
       body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.token}`,
-        "User-Agent": `AtlasNext/${this.version}`
-      }
+      headers
     });
     this.throwResponseErrors(response, key);
   }
@@ -124,6 +128,9 @@ var EdgeCache = class {
 import { promises as fs } from "fs";
 import { denormalizePagePath } from "next/dist/shared/lib/page-path/denormalize-page-path";
 import { normalizePagePath } from "next/dist/shared/lib/page-path/normalize-page-path";
+import {
+  CachedRouteKind
+} from "next/dist/server/response-cache";
 var RemoteCacheHandler = class _RemoteCacheHandler {
   debug;
   filesystemCache;
@@ -171,13 +178,13 @@ var RemoteCacheHandler = class _RemoteCacheHandler {
     }
   }
   async get(...args) {
-    const [key, ctx = {}] = args;
+    const [key, ctx] = args;
     if (!this.useKVStore(key)) {
-      this.debugLog(`GET <hint:${ctx.kindHint}> ${key} (skip remote cache)`);
+      this.debugLog(`GET <hint:${ctx.kind}> ${key} (skip remote cache)`);
       return await this.filesystemCache.get(key, ctx);
     }
     const remoteKey = this.generateKey(key);
-    this.debugLog(`GET <hint:${ctx.kindHint}> ${key} ${remoteKey}`);
+    this.debugLog(`GET <hint:${ctx.kind}> ${key} ${remoteKey}`);
     try {
       const data = await this.kvStore?.get(remoteKey);
       return data;
@@ -216,14 +223,19 @@ var RemoteCacheHandler = class _RemoteCacheHandler {
     };
     const remoteKey = this.generateKey(key);
     this.debugLog(`SET <kind:${data.kind}> ${key} ${remoteKey}`);
+    const isODISR = data.kind === CachedRouteKind.PAGES && this.isSetIncrementalResponseCacheContext(ctx) && await this.isOnDemand(ctx);
+    let nextRevalidateMethod = "";
+    if (data.kind === CachedRouteKind.PAGES) {
+      nextRevalidateMethod = isODISR ? "OnDemandISR" : "ISR";
+    }
     try {
-      await this.kvStore?.set(remoteKey, cacheEntry);
+      await this.kvStore?.set(remoteKey, cacheEntry, nextRevalidateMethod);
     } catch (error) {
       console.error(this.getErrorMessage(error));
     }
     await this.filesystemCache.set(...args);
     try {
-      if (data.kind === "PAGE" && await this.isOnDemand(ctx)) {
+      if (isODISR) {
         const paths = await this.cacheKeyToPaths(key);
         this.debugLog(
           `ODISR for Page Router revalidated, purging paths: ${paths.join(" ")}`
@@ -310,13 +322,13 @@ var RemoteCacheHandler = class _RemoteCacheHandler {
    * @returns
    */
   async isOnDemand(ctx) {
-    if (ctx === void 0) {
+    if (ctx?.cacheControl === void 0) {
       return false;
     }
-    if (ctx.revalidate === void 0 || ctx.revalidate === false) {
+    if (ctx.cacheControl.revalidate === void 0 || ctx.cacheControl.revalidate === false) {
       return true;
     }
-    if (ctx.revalidate < _RemoteCacheHandler.minISRCacheRevalidateSeconds) {
+    if (ctx.cacheControl.revalidate < _RemoteCacheHandler.minISRCacheRevalidateSeconds) {
       return false;
     }
     if (this.previewModeId !== void 0) {
@@ -333,6 +345,9 @@ var RemoteCacheHandler = class _RemoteCacheHandler {
       }
     }
     return false;
+  }
+  isSetIncrementalResponseCacheContext(ctx) {
+    return ctx.cacheControl !== void 0;
   }
 };
 
