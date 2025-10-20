@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   const page = req.query.page
 
   if (!page) {
-    res.setHeader('Cache-Control', 's-maxage=86400')
+    res.setHeader('Cache-Control', 's-maxage=30')
     res.status(500).send('Page query param not found')
   }
 
